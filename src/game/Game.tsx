@@ -3,6 +3,12 @@ import { useGameStore } from './store';
 import type { Car as CarType, Position } from './types';
 import { useEffect } from 'react';
 
+// Layout constants
+const CELL_SIZE = 50;
+const GAP_SIZE = 2;
+const DEFAULT_BOARD_SIZE = 6;
+const DEFAULT_CAR_COUNT = 5;
+
 const GameContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -58,17 +64,17 @@ const Board = styled.div<{ $size: number }>`
   position: relative;
   transform: rotate(45deg);
   display: grid;
-  grid-template-columns: repeat(${props => props.$size}, 50px);
-  grid-template-rows: repeat(${props => props.$size}, 50px);
-  gap: 2px;
+  grid-template-columns: repeat(${props => props.$size}, ${CELL_SIZE}px);
+  grid-template-rows: repeat(${props => props.$size}, ${CELL_SIZE}px);
+  gap: ${GAP_SIZE}px;
   background-color: #333;
-  padding: 2px;
+  padding: ${GAP_SIZE}px;
   border-radius: 5px;
 `;
 
 const Cell = styled.div`
-  width: 50px;
-  height: 50px;
+  width: ${CELL_SIZE}px;
+  height: ${CELL_SIZE}px;
   background-color: #e0e0e0;
   border-radius: 3px;
 `;
@@ -96,10 +102,11 @@ const CarElement = styled.div<{
     const maxRow = Math.max(props.$head.row, props.$tail.row);
     const maxCol = Math.max(props.$head.col, props.$tail.col);
     
-    const top = minRow * 52 + 2; // 50px cell + 2px gap
-    const left = minCol * 52 + 2;
-    const width = (maxCol - minCol + 1) * 50 + (maxCol - minCol) * 2;
-    const height = (maxRow - minRow + 1) * 50 + (maxRow - minRow) * 2;
+    const cellWithGap = CELL_SIZE + GAP_SIZE;
+    const top = minRow * cellWithGap + GAP_SIZE;
+    const left = minCol * cellWithGap + GAP_SIZE;
+    const width = (maxCol - minCol + 1) * CELL_SIZE + (maxCol - minCol) * GAP_SIZE;
+    const height = (maxRow - minRow + 1) * CELL_SIZE + (maxRow - minRow) * GAP_SIZE;
     
     return `
       top: ${top}px;
@@ -156,7 +163,7 @@ const Game = () => {
   const { boardSize, cars, status, movingCarId, initGame, moveCar } = useGameStore();
   
   useEffect(() => {
-    initGame(6, 5);
+    initGame(DEFAULT_BOARD_SIZE, DEFAULT_CAR_COUNT);
   }, [initGame]);
   
   const handleCarClick = (carId: string) => {
@@ -181,7 +188,7 @@ const Game = () => {
       </StatusMessage>
       
       <Controls>
-        <Button onClick={() => initGame(6, 5)}>New Game</Button>
+        <Button onClick={() => initGame(DEFAULT_BOARD_SIZE, DEFAULT_CAR_COUNT)}>New Game</Button>
       </Controls>
       
       <BoardWrapper>

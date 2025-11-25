@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import type { Car, Direction, GameState, GameStatus, Position } from './types';
 
+// Game configuration constants
+const ANIMATION_DELAY_MS = 150;
+const MAX_CAR_GENERATION_ATTEMPTS = 1000;
+const DEFAULT_BOARD_SIZE = 6;
+const DEFAULT_CAR_COUNT = 5;
+
 // Helper function to generate a random color
 const generateColor = (): string => {
   const colors = [
@@ -52,9 +58,8 @@ const generateCars = (boardSize: number, carCount: number): Car[] => {
   const directions: Direction[] = ['up', 'down', 'left', 'right'];
   
   let attempts = 0;
-  const maxAttempts = 1000;
   
-  while (cars.length < carCount && attempts < maxAttempts) {
+  while (cars.length < carCount && attempts < MAX_CAR_GENERATION_ATTEMPTS) {
     attempts++;
     
     const direction = directions[Math.floor(Math.random() * directions.length)];
@@ -135,12 +140,12 @@ interface GameStore extends GameState {
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  boardSize: 6,
+  boardSize: DEFAULT_BOARD_SIZE,
   cars: [],
   status: 'playing',
   movingCarId: null,
   
-  initGame: (boardSize = 6, carCount = 5) => {
+  initGame: (boardSize = DEFAULT_BOARD_SIZE, carCount = DEFAULT_CAR_COUNT) => {
     const cars = generateCars(boardSize, carCount);
     const status: GameStatus = cars.length === 0 ? 'won' : 
       canAnyCarMove(cars, boardSize) ? 'playing' : 'lost';
@@ -211,7 +216,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (canCarMove(movedCar, newCars, currentState.boardSize)) {
         // Continue moving
         set({ cars: newCars });
-        setTimeout(animateMove, 150);
+        setTimeout(animateMove, ANIMATION_DELAY_MS);
       } else {
         // Stop moving
         let newStatus: GameStatus = 'playing';
@@ -227,6 +232,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     };
     
-    setTimeout(animateMove, 150);
+    setTimeout(animateMove, ANIMATION_DELAY_MS);
   }
 }));
