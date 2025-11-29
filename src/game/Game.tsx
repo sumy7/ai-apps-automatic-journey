@@ -232,18 +232,6 @@ const CarHead = styled.div<{ $direction: string }>`
   }}
 `;
 
-const PowerUpInfo = styled.div`
-  font-size: 16px;
-  
-  @media (prefers-color-scheme: dark) {
-    color: #ccc;
-  }
-  
-  @media (prefers-color-scheme: light) {
-    color: #666;
-  }
-`;
-
 interface CarProps {
   car: CarType;
   isMoving: boolean;
@@ -307,10 +295,6 @@ const Game = () => {
           🔄 Flip 3 Cars ({flipPowerUpCount} left)
         </PowerUpButton>
       </Controls>
-      
-      <PowerUpInfo>
-        Power-ups remaining: {flipPowerUpCount}
-      </PowerUpInfo>
       
       <BoardWrapper>
         <Board $size={boardSize}>

@@ -266,10 +266,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Don't use power-up if game is over, a car is moving, or no power-ups left
     if (status !== 'playing' || movingCarId !== null || flipPowerUpCount <= 0 || cars.length === 0) return;
     
-    // Randomly select up to FLIP_CAR_COUNT cars to flip
+    // Randomly select up to FLIP_CAR_COUNT cars to flip using Fisher-Yates shuffle
     const carsToFlip = Math.min(FLIP_CAR_COUNT, cars.length);
-    const shuffledIndices = [...Array(cars.length).keys()].sort(() => Math.random() - 0.5);
-    const indicesToFlip = shuffledIndices.slice(0, carsToFlip);
+    const indices = [...Array(cars.length).keys()];
+    
+    // Fisher-Yates shuffle for unbiased randomization
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    
+    const indicesToFlip = indices.slice(0, carsToFlip);
     
     const newCars = cars.map((car, index) => 
       indicesToFlip.includes(index) ? flipCarDirection(car) : car
