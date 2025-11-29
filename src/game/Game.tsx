@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 const CELL_SIZE = 60;
 const GAP_SIZE = 3;
 const DEFAULT_BOARD_SIZE = 8;
-const DEFAULT_CAR_COUNT = 10;
+const DEFAULT_CAR_COUNT = 15;
 
 const GameContainer = styled.div`
   display: flex;

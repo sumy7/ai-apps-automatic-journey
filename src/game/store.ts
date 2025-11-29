@@ -5,7 +5,7 @@ import type { Car, Direction, GameState, GameStatus, Position } from './types';
 const ANIMATION_DELAY_MS = 150;
 const MAX_CAR_GENERATION_ATTEMPTS = 1000;
 const DEFAULT_BOARD_SIZE = 8;
-const DEFAULT_CAR_COUNT = 10;
+const DEFAULT_CAR_COUNT = 15;
 const DEFAULT_FLIP_POWER_UP_COUNT = 2;
 const FLIP_CAR_COUNT = 3;
 
@@ -171,8 +171,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   
   initGame: (boardSize = DEFAULT_BOARD_SIZE, carCount = DEFAULT_CAR_COUNT) => {
     const cars = generateCars(boardSize, carCount);
+    // Only lose if no cars can move AND no power-ups available
     const status: GameStatus = cars.length === 0 ? 'won' : 
-      canAnyCarMove(cars, boardSize) ? 'playing' : 'lost';
+      (canAnyCarMove(cars, boardSize) || DEFAULT_FLIP_POWER_UP_COUNT > 0) ? 'playing' : 'lost';
     
     set({
       boardSize,
@@ -218,11 +219,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Remove the car
         const newCars = currentState.cars.filter(c => c.id !== carId);
         
-        // Check game status
+        // Check game status - only lose if no moves AND no power-ups
         let newStatus: GameStatus = 'playing';
         if (newCars.length === 0) {
           newStatus = 'won';
-        } else if (!canAnyCarMove(newCars, currentState.boardSize)) {
+        } else if (!canAnyCarMove(newCars, currentState.boardSize) && currentState.flipPowerUpCount <= 0) {
           newStatus = 'lost';
         }
         
@@ -243,9 +244,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ cars: newCars });
         setTimeout(animateMove, ANIMATION_DELAY_MS);
       } else {
-        // Stop moving
+        // Stop moving - only lose if no moves AND no power-ups
         let newStatus: GameStatus = 'playing';
-        if (!canAnyCarMove(newCars, currentState.boardSize)) {
+        if (!canAnyCarMove(newCars, currentState.boardSize) && currentState.flipPowerUpCount <= 0) {
           newStatus = 'lost';
         }
         
@@ -282,15 +283,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       indicesToFlip.includes(index) ? flipCarDirection(car) : car
     );
     
-    // Check game status after flipping
+    const newFlipPowerUpCount = flipPowerUpCount - 1;
+    
+    // Check game status after flipping - only lose if no moves AND no power-ups left
     let newStatus: GameStatus = 'playing';
-    if (!canAnyCarMove(newCars, boardSize)) {
+    if (!canAnyCarMove(newCars, boardSize) && newFlipPowerUpCount <= 0) {
       newStatus = 'lost';
     }
     
     set({
       cars: newCars,
-      flipPowerUpCount: flipPowerUpCount - 1,
+      flipPowerUpCount: newFlipPowerUpCount,
       status: newStatus
     });
   }
