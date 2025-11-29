@@ -2,6 +2,21 @@
 
 A puzzle game where you eliminate cars from an isometric 3D board by clicking on them to make them move in their facing direction.
 
+## 🎯 Demo
+
+**[Play the Game →](https://sumy7.github.io/ai-apps-automatic-journey/)**
+
+## 📸 Screenshots
+
+### Desktop (Widescreen)
+![Desktop Screenshot](https://github.com/user-attachments/assets/450231f0-7134-48fc-adf3-6173f855e148)
+
+### Tablet
+![Tablet Screenshot](https://github.com/user-attachments/assets/860df55b-bd89-41b6-b5cf-6267fbaf2e9b)
+
+### Mobile
+![Mobile Screenshot](https://github.com/user-attachments/assets/fcc01d02-d538-46bf-84ad-86f9e02cc69f)
+
 ## 🎮 How to Play
 
 1. **Click on any car** to make it move in the direction it's facing (indicated by the white dot)
