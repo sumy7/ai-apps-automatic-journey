@@ -4,8 +4,10 @@ import type { Car, Direction, GameState, GameStatus, Position } from './types';
 // Game configuration constants
 const ANIMATION_DELAY_MS = 150;
 const MAX_CAR_GENERATION_ATTEMPTS = 1000;
-const DEFAULT_BOARD_SIZE = 6;
-const DEFAULT_CAR_COUNT = 5;
+const DEFAULT_BOARD_SIZE = 8;
+const DEFAULT_CAR_COUNT = 10;
+const DEFAULT_FLIP_POWER_UP_COUNT = 2;
+const FLIP_CAR_COUNT = 3;
 
 // Helper function to generate a random color
 const generateColor = (): string => {
@@ -134,9 +136,30 @@ const isCarOutside = (car: Car, boardSize: number): boolean => {
   return !isInBoard(car.head, boardSize) && !isInBoard(car.tail, boardSize);
 };
 
+// Helper function to get the opposite direction
+const getOppositeDirection = (direction: Direction): Direction => {
+  switch (direction) {
+    case 'up': return 'down';
+    case 'down': return 'up';
+    case 'left': return 'right';
+    case 'right': return 'left';
+  }
+};
+
+// Helper function to flip car direction (swap head and tail)
+const flipCarDirection = (car: Car): Car => {
+  return {
+    ...car,
+    head: car.tail,
+    tail: car.head,
+    direction: getOppositeDirection(car.direction)
+  };
+};
+
 interface GameStore extends GameState {
   initGame: (boardSize?: number, carCount?: number) => void;
   moveCar: (carId: string) => void;
+  activateFlipPowerUp: () => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -144,6 +167,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   cars: [],
   status: 'playing',
   movingCarId: null,
+  flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT,
   
   initGame: (boardSize = DEFAULT_BOARD_SIZE, carCount = DEFAULT_CAR_COUNT) => {
     const cars = generateCars(boardSize, carCount);
@@ -154,7 +178,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       boardSize,
       cars,
       status,
-      movingCarId: null
+      movingCarId: null,
+      flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT
     });
   },
   
@@ -233,5 +258,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
     
     setTimeout(animateMove, ANIMATION_DELAY_MS);
+  },
+  
+  activateFlipPowerUp: () => {
+    const { cars, boardSize, status, movingCarId, flipPowerUpCount } = get();
+    
+    // Don't use power-up if game is over, a car is moving, or no power-ups left
+    if (status !== 'playing' || movingCarId !== null || flipPowerUpCount <= 0 || cars.length === 0) return;
+    
+    // Randomly select up to FLIP_CAR_COUNT cars to flip
+    const carsToFlip = Math.min(FLIP_CAR_COUNT, cars.length);
+    const shuffledIndices = [...Array(cars.length).keys()].sort(() => Math.random() - 0.5);
+    const indicesToFlip = shuffledIndices.slice(0, carsToFlip);
+    
+    const newCars = cars.map((car, index) => 
+      indicesToFlip.includes(index) ? flipCarDirection(car) : car
+    );
+    
+    // Check game status after flipping
+    let newStatus: GameStatus = 'playing';
+    if (!canAnyCarMove(newCars, boardSize)) {
+      newStatus = 'lost';
+    }
+    
+    set({
+      cars: newCars,
+      flipPowerUpCount: flipPowerUpCount - 1,
+      status: newStatus
+    });
   }
 }));
