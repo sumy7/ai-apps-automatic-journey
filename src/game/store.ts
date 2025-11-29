@@ -4,8 +4,10 @@ import type { Car, Direction, GameState, GameStatus, Position } from './types';
 // Game configuration constants
 const ANIMATION_DELAY_MS = 150;
 const MAX_CAR_GENERATION_ATTEMPTS = 1000;
-const DEFAULT_BOARD_SIZE = 6;
-const DEFAULT_CAR_COUNT = 5;
+const DEFAULT_BOARD_SIZE = 8;
+const DEFAULT_CAR_COUNT = 15;
+const DEFAULT_FLIP_POWER_UP_COUNT = 2;
+const FLIP_CAR_COUNT = 3;
 
 // Helper function to generate a random color
 const generateColor = (): string => {
@@ -134,9 +136,30 @@ const isCarOutside = (car: Car, boardSize: number): boolean => {
   return !isInBoard(car.head, boardSize) && !isInBoard(car.tail, boardSize);
 };
 
+// Helper function to get the opposite direction
+const getOppositeDirection = (direction: Direction): Direction => {
+  switch (direction) {
+    case 'up': return 'down';
+    case 'down': return 'up';
+    case 'left': return 'right';
+    case 'right': return 'left';
+  }
+};
+
+// Helper function to flip car direction (swap head and tail)
+const flipCarDirection = (car: Car): Car => {
+  return {
+    ...car,
+    head: car.tail,
+    tail: car.head,
+    direction: getOppositeDirection(car.direction)
+  };
+};
+
 interface GameStore extends GameState {
   initGame: (boardSize?: number, carCount?: number) => void;
   moveCar: (carId: string) => void;
+  activateFlipPowerUp: () => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -144,17 +167,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
   cars: [],
   status: 'playing',
   movingCarId: null,
+  flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT,
   
   initGame: (boardSize = DEFAULT_BOARD_SIZE, carCount = DEFAULT_CAR_COUNT) => {
     const cars = generateCars(boardSize, carCount);
+    // Only lose if no cars can move AND no power-ups available
     const status: GameStatus = cars.length === 0 ? 'won' : 
-      canAnyCarMove(cars, boardSize) ? 'playing' : 'lost';
+      (canAnyCarMove(cars, boardSize) || DEFAULT_FLIP_POWER_UP_COUNT > 0) ? 'playing' : 'lost';
     
     set({
       boardSize,
       cars,
       status,
-      movingCarId: null
+      movingCarId: null,
+      flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT
     });
   },
   
@@ -193,11 +219,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Remove the car
         const newCars = currentState.cars.filter(c => c.id !== carId);
         
-        // Check game status
+        // Check game status - only lose if no moves AND no power-ups
         let newStatus: GameStatus = 'playing';
         if (newCars.length === 0) {
           newStatus = 'won';
-        } else if (!canAnyCarMove(newCars, currentState.boardSize)) {
+        } else if (!canAnyCarMove(newCars, currentState.boardSize) && currentState.flipPowerUpCount <= 0) {
           newStatus = 'lost';
         }
         
@@ -218,9 +244,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ cars: newCars });
         setTimeout(animateMove, ANIMATION_DELAY_MS);
       } else {
-        // Stop moving
+        // Stop moving - only lose if no moves AND no power-ups
         let newStatus: GameStatus = 'playing';
-        if (!canAnyCarMove(newCars, currentState.boardSize)) {
+        if (!canAnyCarMove(newCars, currentState.boardSize) && currentState.flipPowerUpCount <= 0) {
           newStatus = 'lost';
         }
         
@@ -233,5 +259,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
     
     setTimeout(animateMove, ANIMATION_DELAY_MS);
+  },
+  
+  activateFlipPowerUp: () => {
+    const { cars, boardSize, status, movingCarId, flipPowerUpCount } = get();
+    
+    // Don't use power-up if game is over, a car is moving, or no power-ups left
+    if (status !== 'playing' || movingCarId !== null || flipPowerUpCount <= 0 || cars.length === 0) return;
+    
+    // Randomly select up to FLIP_CAR_COUNT cars to flip using Fisher-Yates shuffle
+    const carsToFlip = Math.min(FLIP_CAR_COUNT, cars.length);
+    const indices = [...Array(cars.length).keys()];
+    
+    // Fisher-Yates shuffle for unbiased randomization
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    
+    const indicesToFlip = indices.slice(0, carsToFlip);
+    
+    const newCars = cars.map((car, index) => 
+      indicesToFlip.includes(index) ? flipCarDirection(car) : car
+    );
+    
+    const newFlipPowerUpCount = flipPowerUpCount - 1;
+    
+    // Check game status after flipping - only lose if no moves AND no power-ups left
+    let newStatus: GameStatus = 'playing';
+    if (!canAnyCarMove(newCars, boardSize) && newFlipPowerUpCount <= 0) {
+      newStatus = 'lost';
+    }
+    
+    set({
+      cars: newCars,
+      flipPowerUpCount: newFlipPowerUpCount,
+      status: newStatus
+    });
   }
 }));

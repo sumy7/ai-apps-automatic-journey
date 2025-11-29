@@ -25,4 +25,5 @@ export interface GameState {
   cars: Car[];
   status: GameStatus;
   movingCarId: string | null;
+  flipPowerUpCount: number; // Number of flip power-ups remaining
 }
