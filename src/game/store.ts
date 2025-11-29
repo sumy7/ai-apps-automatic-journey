@@ -168,6 +168,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   status: 'playing',
   movingCarId: null,
   flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT,
+  moveCount: 0,
+  initialCarCount: DEFAULT_CAR_COUNT,
   
   initGame: (boardSize = DEFAULT_BOARD_SIZE, carCount = DEFAULT_CAR_COUNT) => {
     const cars = generateCars(boardSize, carCount);
@@ -180,12 +182,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       cars,
       status,
       movingCarId: null,
-      flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT
+      flipPowerUpCount: DEFAULT_FLIP_POWER_UP_COUNT,
+      moveCount: 0,
+      initialCarCount: cars.length // Track actual initial car count
     });
   },
   
   moveCar: (carId: string) => {
-    const { cars, boardSize, status, movingCarId } = get();
+    const { cars, boardSize, status, movingCarId, moveCount } = get();
     
     // Don't move if game is over or another car is moving
     if (status !== 'playing' || movingCarId !== null) return;
@@ -198,8 +202,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Check if car can move
     if (!canCarMove(car, cars, boardSize)) return;
     
-    // Set moving car
-    set({ movingCarId: carId });
+    // Set moving car and increment move count
+    set({ movingCarId: carId, moveCount: moveCount + 1 });
     
     // Animate the car movement
     const animateMove = () => {

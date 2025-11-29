@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components';
 import { useGameStore } from './store';
 import type { Car as CarType, Position } from './types';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 // Layout constants - Increased for larger board and fuller cars
 const CELL_SIZE = 60;
@@ -505,21 +505,16 @@ const Car = ({ car, isMoving, onClick }: CarProps) => {
 };
 
 const Game = () => {
-  const { boardSize, cars, status, movingCarId, flipPowerUpCount, initGame, moveCar, activateFlipPowerUp } = useGameStore();
-  const [moveCount, setMoveCount] = useState(0);
+  const { boardSize, cars, status, movingCarId, flipPowerUpCount, moveCount, initialCarCount, initGame, moveCar, activateFlipPowerUp } = useGameStore();
   
   // Initialize game on mount only
   useEffect(() => {
     initGame(DEFAULT_BOARD_SIZE, DEFAULT_CAR_COUNT);
   }, [initGame]);
   
-  // Track initial car count from the store after init
-  const initialCarCount = DEFAULT_CAR_COUNT;
-  
   const handleCarClick = (carId: string) => {
     if (status !== 'playing' || movingCarId !== null) return;
     moveCar(carId);
-    setMoveCount(prev => prev + 1);
   };
   
   const handleFlipPowerUp = () => {
@@ -529,7 +524,6 @@ const Game = () => {
   
   const handleNewGame = () => {
     initGame(DEFAULT_BOARD_SIZE, DEFAULT_CAR_COUNT);
-    setMoveCount(0);
   };
   
   const getStatusText = () => {

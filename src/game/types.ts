@@ -26,4 +26,6 @@ export interface GameState {
   status: GameStatus;
   movingCarId: string | null;
   flipPowerUpCount: number; // Number of flip power-ups remaining
+  moveCount: number; // Number of moves made
+  initialCarCount: number; // Initial car count when game started
 }
