@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# 🚗 Car Elimination Game
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A puzzle game where you eliminate cars from an isometric 3D board by clicking on them to make them move in their facing direction.
 
-Currently, two official plugins are available:
+## 🎯 Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**[Play the Game →](https://sumy7.github.io/ai-apps-automatic-journey/)**
 
-## React Compiler
+## 📸 Screenshots
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Desktop (Widescreen)
+![Desktop Screenshot](https://github.com/user-attachments/assets/450231f0-7134-48fc-adf3-6173f855e148)
 
-## Expanding the ESLint configuration
+### Tablet
+![Tablet Screenshot](https://github.com/user-attachments/assets/860df55b-bd89-41b6-b5cf-6267fbaf2e9b)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Mobile
+![Mobile Screenshot](https://github.com/user-attachments/assets/fcc01d02-d538-46bf-84ad-86f9e02cc69f)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🎮 How to Play
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Click on any car** to make it move in the direction it's facing (indicated by the white dot)
+2. Cars will continue moving until they hit another car or exit the board
+3. When a car exits the board, it's eliminated
+4. **Win** by eliminating all cars from the board
+5. **Lose** if no cars can move and you're out of power-ups
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ✨ Features
+
+- **Isometric 3D Board**: Beautiful 45-degree angled view with 3D car effects
+- **Responsive Design**: Optimized for desktop (widescreen sidebar), tablet, and mobile layouts
+- **Dark/Light Mode**: Automatic theme detection based on system preferences
+- **Power-ups**: Use "Flip 3 Cars" to randomly change the direction of 3 cars
+- **Statistics Panel**: Track cars remaining, eliminated, moves made, and power-ups left
+
+## 🛠️ Tech Stack
+
+- **React 19** - UI Framework
+- **TypeScript** - Type Safety
+- **Vite** - Build Tool
+- **styled-components** - CSS-in-JS Styling
+- **Zustand** - State Management
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📁 Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── game/
+│   ├── Game.tsx      # Main game component with UI
+│   ├── store.ts      # Zustand state management
+│   ├── types.ts      # TypeScript type definitions
+│   └── index.ts      # Module exports
+├── App.tsx           # Root application component
+├── main.tsx          # Application entry point
+└── index.css         # Global styles
+```
+
+## 📜 License
+
+MIT
